@@ -23,7 +23,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     private float lastX, lastY, lastZ;
 
     private SensorManager sensorManager;
+    private SensorManager sensorManagerG;
     private Sensor accelerometer;
+    private Sensor gyrometer;
 
     private float deltaXMax = 0;
     private float deltaYMax = 0;
@@ -55,7 +57,13 @@ public class MainActivity extends Activity implements SensorEventListener {
         } else {
             // fai! we dont have an accelerometer!
         }
+        sensorManagerG = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManagerG.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null){
 
+            gyrometer = sensorManagerG.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+            sensorManagerG.registerListener(this, gyrometer,SensorManager.SENSOR_DELAY_NORMAL);
+            vibrateThreshold = gyrometer.getMaximumRange()/2;
+        }
         //initialize vibration
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
