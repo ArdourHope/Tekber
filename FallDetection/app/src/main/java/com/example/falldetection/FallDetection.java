@@ -12,13 +12,18 @@ import android.hardware.SensorManager;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static java.lang.Thread.sleep;
 
@@ -41,7 +46,7 @@ public class FallDetection extends Activity implements SensorEventListener {
     private Sensor accelerometer;
     private Sensor gyrometer;
 
-    private TextView statustext;
+    private TextView statustext, counterText;
 
 
     private float vibrateThreshold = 0;
@@ -59,15 +64,15 @@ public class FallDetection extends Activity implements SensorEventListener {
     private ArrayList<Float> accY = new ArrayList<Float>();
     private ArrayList<Float> accZ = new ArrayList<Float>();
 
-
-
-
+    DatabaseHelper mDatabasehelper;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fall_detection);
+
+        mDatabasehelper = new DatabaseHelper(this);
 
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -84,28 +89,52 @@ public class FallDetection extends Activity implements SensorEventListener {
                                          boolean isChecked) {
 
                 if (isChecked) {
+                    statustext.setText("ON");
                     initializesensor();
-                    onResume();
+
                 } else {
                     onPause();
-                    Intent i = getBaseContext().getPackageManager()
-                            .getLaunchIntentForPackage( getBaseContext().getPackageName() );
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(i);
+
                     statustext.setText("OFF");
-                }
+            }
 
             }
 
         });
 
+        Button ButtonDat = findViewById(R.id.History);
+        ButtonDat.setOnClickListener(new View.OnClickListener() {
 
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(FallDetection.this, ViewData.class));
+            }
+
+        });
+
+        counterText = findViewById(R.id.counterFall);
+        String countertext = mDatabasehelper.count();
+        counterText.setText(countertext);
+
+
+
+    }
+
+    public void AddData(String History){
+        boolean insertData = mDatabasehelper.addData(History);
+
+        if (insertData) {
+            toastMessage("Data Recorded");
+        }
+        else {
+            toastMessage("Data Recorded");
+        }
 
     }
 
     protected void initializesensor(){
 
-        statustext.setText("ON");
+
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
@@ -126,8 +155,6 @@ public class FallDetection extends Activity implements SensorEventListener {
 
         }
 
-
-
         //initialize vibration
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
     }
@@ -136,6 +163,13 @@ public class FallDetection extends Activity implements SensorEventListener {
         super.onPause();
         sensorManager.unregisterListener(this);
         sensorManagerG.unregisterListener(this);
+    }
+
+    protected void onResume() {
+        super.onResume();
+        statustext.setText("ON");
+        initializesensor();
+
     }
 
     @Override
@@ -164,32 +198,36 @@ public class FallDetection extends Activity implements SensorEventListener {
             int beforestate = startstate - 12;
 
             if(startstate > 20 ){
+                String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
                 if (anx > accX.get(beforestate) ){
                     if (anx - accX.get(beforestate) >5){
                         onPause();
                         statustext.setText("FALL");
+                        AddData(date);
                         v.vibrate(200);
                         try {
-                            sleep(200);
+                            sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
-                        onResume();
+
+
                     }
                 }
                 else if (anx < accX.get(beforestate)){
                     if (accX.get(beforestate) - anx >5){
                         onPause();
                         statustext.setText("FALL");
+                        AddData(date);
                         v.vibrate(200);
                         try {
-                            sleep(200);
+                            sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
-                        onResume();
+
 
                     }
                 }
@@ -198,56 +236,68 @@ public class FallDetection extends Activity implements SensorEventListener {
                     if (any - accY.get(beforestate) >5){
                         onPause();
                         statustext.setText("FALL");
+                        AddData(date);
                         v.vibrate(200);
+
                         try {
-                            sleep(200);
+                            sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
-                        onResume();
+
+
                     }
                 }
                 else if (any < accY.get(beforestate)){
                     if (accY.get(beforestate) - any >5){
                         onPause();
                         statustext.setText("FALL");
+                        AddData(date);
                         v.vibrate(200);
                         try {
-                            sleep(200);
+                            sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
-                        onResume();
+
+
+
                     }
                 }
                 if (anz > accZ.get(beforestate) ){
                     if (anz - accZ.get(beforestate) >5){
                         onPause();
                         statustext.setText("FALL");
+                        AddData(date);
                         v.vibrate(200);
                         try {
-                            sleep(200);
+                            sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
-                        onResume();
+
+
+
                     }
                 }
                 else if (anz < accZ.get(beforestate)){
                     if (accZ.get(beforestate) - anz >5){
                         onPause();
                         statustext.setText("FALL");
+                        AddData(date);
                         v.vibrate(200);
                         try {
-                            sleep(200);
+                            sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
-                        onResume();
+
+
+
                     }
                 }
 
@@ -271,5 +321,9 @@ public class FallDetection extends Activity implements SensorEventListener {
             startstateg +=1;
         }
 
+    }
+
+    private void toastMessage(String message){
+        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
     }
 }

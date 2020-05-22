@@ -167,6 +167,8 @@ public class FallRecord extends Activity implements SensorEventListener {
         sensorManagerG.unregisterListener(this);
     }
 
+
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
